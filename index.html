@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f8a68">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="StudioVast">
+<title>StudioVast</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231f8a68'/%3E%3Ctext x='32' y='44' font-size='34' font-family='Arial' font-weight='700' text-anchor='middle' fill='%23ffd60a'%3EN%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: one phone-width console column — compose card on top, run feed below, tools last. */
+:root {
+  --bg: #f2f5f1;
+  --surface: #ffffff;
+  --ink: #13201b;
+  --muted: #5b6b64;
+  --line: #d9e2dc;
+  --mint: #1f8a68;
+  --mint-soft: #dcf1e8;
+  --on-mint: #ffffff;
+  --caption: #ffd60a;
+  --ok: #1f8a68;
+  --warn: #b26b00;
+  --warn-soft: #fff1d6;
+  --bad: #c0392b;
+  --bad-soft: #fde4e1;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "Instrument Sans", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1613; --surface: #16211d; --ink: #e8f0ec; --muted: #94a69e; --line: #26352f;
+    --mint: #4fd1a5; --mint-soft: #173a2e; --on-mint: #0e1613; --ok: #4fd1a5; --warn: #f0b04a; --warn-soft: #3a2c12;
+    --bad: #ff7b6b; --bad-soft: #3d1c18; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1613; --surface: #16211d; --ink: #e8f0ec; --muted: #94a69e; --line: #26352f;
+  --mint: #4fd1a5; --mint-soft: #173a2e; --on-mint: #0e1613; --ok: #4fd1a5; --warn: #f0b04a; --warn-soft: #3a2c12;
+  --bad: #ff7b6b; --bad-soft: #3d1c18; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font: 16px/1.5 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: max(20px, env(safe-area-inset-top, 0px)) max(48px, env(safe-area-inset-bottom, 0px));
+  margin: 0;
+}
+.wrap { max-width: 560px; margin: 0 auto; display: grid; gap: 22px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+h1 { font: 800 30px/1 var(--display); margin: 0; letter-spacing: -0.02em; }
+h1 .cap { background: var(--caption); color: #13201b; padding: 0 6px; border-radius: 4px; }
+h2 { font: 600 19px/1.2 var(--display); margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); font-size: 14px; margin: 4px 0 0; }
+.pill { font: 600 12px/1 var(--body); letter-spacing: .04em; text-transform: uppercase; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.pill.ok { background: var(--mint-soft); color: var(--mint); border-color: transparent; }
+.pill.warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+.pill.bad { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 14px; }
+label.lbl { font: 600 12px/1 var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+textarea {
+  width: 100%; min-height: 96px; resize: vertical; font: 17px/1.45 var(--body); color: var(--ink);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px;
+}
+textarea:focus, button:focus-visible, a:focus-visible, input:focus-visible + span { outline: 2px solid var(--mint); outline-offset: 2px; }
+.ideas { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.ideas button { flex: none; font: 500 13px/1.2 var(--body); color: var(--ink); background: transparent; border: 1px dashed var(--line); border-radius: 999px; padding: 7px 12px; cursor: pointer; }
+.ideas button:hover { border-color: var(--mint); }
+.platforms { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.chip span { display: inline-block; font: 600 14px/1 var(--body); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); color: var(--muted); }
+.chip input:checked + span { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.hint { font-size: 13px; color: var(--muted); margin: 0; }
+.go {
+  font: 700 17px/1 var(--display); padding: 16px; border-radius: 12px; border: 0; cursor: pointer;
+  background: var(--mint); color: var(--on-mint);
+}
+.go[disabled] { opacity: .55; cursor: progress; }
+.msg { font-size: 14px; border-radius: 10px; padding: 10px 12px; margin: 0; }
+.msg.ok { background: var(--mint-soft); color: var(--ink); }
+.msg.bad { background: var(--bad-soft); color: var(--ink); }
+.msg.warn { background: var(--warn-soft); color: var(--ink); }
+.msg a { color: inherit; font-weight: 600; }
+
+.runs-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.stamp { font: 500 12px/1 var(--mono); color: var(--muted); }
+.runs { display: grid; gap: 10px; }
+.run { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.run.example { opacity: .7; border-style: dashed; }
+.run-top { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
+.run-title { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.run-meta { font: 500 12px/1.4 var(--mono); color: var(--muted); }
+.run-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { font: 600 14px/1 var(--body); padding: 10px 12px; border-radius: 9px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.btn.primary { border-color: var(--mint); color: var(--mint); }
+.btn.dl { background: var(--caption); color: #13201b; border-color: transparent; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; display: inline-block; }
+.pill.run-live .dot { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .pill.run-live .dot { animation: none; } }
+
+.tools { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tools a, .tools button { min-width: 0; }
+.tool { display: grid; gap: 4px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; text-align: left; font: inherit; cursor: pointer; }
+.tool b { font: 600 15px/1.2 var(--display); }
+.tool small { color: var(--muted); font-size: 13px; line-height: 1.35; }
+@media (max-width: 380px) { .tools { grid-template-columns: 1fr; } }
+footer { color: var(--muted); font-size: 12px; text-align: center; }
+
+input[type=password], input[type=text].field { width: 100%; font: 16px/1.4 var(--mono); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 8px; font-size: 15px; }
+ol.steps code { font: 500 13px var(--mono); background: var(--bg); padding: 1px 5px; border-radius: 4px; }
+ol.steps a { color: var(--mint); font-weight: 600; }
+video { width: 100%; max-width: 100%; border-radius: 10px; background: #000; aspect-ratio: 9 / 16; max-height: 70vh; }
+.linkbtn { background: none; border: 0; color: var(--muted); font: 500 13px var(--body); text-decoration: underline; cursor: pointer; padding: 0; justify-self: center; }
+[hidden] { display: none !important; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Studio<span class="cap">Vast</span></h1>
+      <p class="sub">Describe a video. StudioVast makes it in about 5 minutes.</p>
+    </div>
+    <span id="conn" class="pill">Not set up</span>
+  </header>
+
+  <!-- One-time setup: paste the studio key -->
+  <form id="setup" class="card" autocomplete="off" hidden>
+    <h2>Connect this phone (one time)</h2>
+    <ol class="steps">
+      <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">this key page</a> and sign in as <b>solaomoDevOps</b>.</li>
+      <li>Name it <code>StudioVast</code>. Set <b>Expiration</b> to 1 year (or the longest offered).</li>
+      <li><b>Repository access</b> → <b>Only select repositories</b> → pick <code>itrealms</code>.</li>
+      <li><b>Permissions</b> → <b>Repository permissions</b> → <b>Actions</b> → <b>Read and write</b>.</li>
+      <li>Tap <b>Generate token</b>, copy it, and paste it below.</li>
+    </ol>
+    <label class="lbl" for="token">Studio key</label>
+    <input type="password" id="token" placeholder="github_pat_…" autocapitalize="off" spellcheck="false">
+    <button class="go" type="submit">Connect</button>
+    <p id="setup-msg" class="msg" hidden></p>
+    <p class="hint">The key is saved only in this browser. Nobody else can see it.</p>
+  </form>
+
+  <div id="app" hidden style="display:grid;gap:22px">
+    <form id="compose" class="card" autocomplete="off">
+      <label class="lbl" for="brief">What should Nova talk about?</label>
+      <textarea id="brief" placeholder="e.g. 3 free apps that pay you to walk — be funny, end with a challenge"></textarea>
+      <div class="ideas" id="ideas" aria-label="Idea starters">
+        <button type="button">5 free AI tools that can make you your first $100</button>
+        <button type="button">How to flip free curb finds for profit</button>
+        <button type="button">The 50/30/20 budget in 30 seconds</button>
+        <button type="button">Side hustles you can start tonight with $0</button>
+      </div>
+      <span class="lbl">Post it to</span>
+      <div class="platforms" id="platforms">
+        <label class="chip"><input type="checkbox" id="p-youtube" value="youtube"><span>YouTube</span></label>
+        <label class="chip"><input type="checkbox" id="p-instagram" value="instagram"><span>Instagram</span></label>
+        <label class="chip"><input type="checkbox" id="p-facebook" value="facebook"><span>Facebook</span></label>
+        <label class="chip"><input type="checkbox" id="p-tiktok" value="tiktok"><span>TikTok</span></label>
+      </div>
+      <p class="hint" id="platform-hint">Nothing selected: the video is made for you to preview, not posted.</p>
+      <button class="go" id="go" type="submit">Make video</button>
+      <p id="compose-msg" class="msg" hidden></p>
+    </form>
+
+    <section style="display:grid;gap:12px">
+      <div class="runs-head">
+        <h2>Your videos</h2>
+        <span class="stamp" id="stamp"></span>
+      </div>
+      <div class="runs" id="runs"></div>
+    </section>
+
+    <section style="display:grid;gap:12px">
+      <h2>Setup &amp; tools</h2>
+      <div class="tools">
+        <button class="tool" type="button" id="face"><b>Design the face</b><small>Makes 6 candidate looks for Nova. Pick one, then set its seed.</small></button>
+        <a class="tool" target="_blank" rel="noopener" href="https://github.com/login?return_to=%2FsolaomoDevOps%2Fitrealms%2Fedit%2Fmaster%2Fai-influencer%2Fbriefs.txt"><b>Idea queue</b><small>One idea per line. Daily runs use the top line.</small></a>
+        <a class="tool" target="_blank" rel="noopener" href="https://github.com/login?return_to=%2FsolaomoDevOps%2Fitrealms%2Fedit%2Fmaster%2Fai-influencer%2Fcharacters%2Fnova%2Fcharacter.yaml"><b>Edit Nova</b><small>Look, voice, niche, links and hashtags.</small></a>
+        <a class="tool" target="_blank" rel="noopener" href="https://github.com/login?return_to=%2FsolaomoDevOps%2Fitrealms%2Fsettings%2Fsecrets%2Factions"><b>Keys &amp; accounts</b><small>Add GEMINI_API_KEY and platform logins.</small></a>
+      </div>
+      <p class="hint">If asked to sign in, use the <b>solaomoDevOps</b> account.</p>
+      <p id="face-msg" class="msg" hidden></p>
+      <button class="linkbtn" type="button" id="forget">Disconnect this phone</button>
+    </section>
+  </div>
+
+  <footer>StudioVast · runs automatically · $0</footer>
+</div>
+
+<script>
+(() => {
+  const API = "https://api.github.com/repos/solaomoDevOps/itrealms";
+  const REF = "master";
+  const $ = (id) => document.getElementById(id);
+
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch {} },
+  };
+  let token = store.get("studiovast.key") || "";
+
+  class StudioError extends Error {
+    constructor(status, message) { super(message); this.status = status; }
+  }
+
+  async function api(path, { method = "GET", body } = {}) {
+    let res;
+    try {
+      res = await fetch(API + path, {
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          ...(body ? { "Content-Type": "application/json" } : {}),
+        },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+    } catch {
+      throw new StudioError(0, "No internet connection, or the studio is unreachable right now.");
+    }
+    if (res.status === 204) return null;
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new StudioError(res.status, data.message || res.statusText);
+    return data;
+  }
+
+  function explain(err) {
+    if (err.status === 401) return "The studio key was rejected. It may have expired. Tap Disconnect this phone at the bottom and paste a new key.";
+    if (err.status === 403) return "The studio key doesn't have permission. Make a new key with Actions set to Read and write.";
+    if (err.status === 404) return "The studio key can't see the itrealms project. Make a new key and pick itrealms under Only select repositories.";
+    if (err.status === 422) return "The studio rejected the request: " + err.message;
+    return err.message || "Something went wrong. Try again in a minute.";
+  }
+
+  function show(el, kind, text, extra) {
+    el.className = "msg " + kind;
+    el.textContent = text;
+    if (extra) el.append(" ", extra);
+    el.hidden = false;
+  }
+  function link(text, href) {
+    const a = document.createElement("a");
+    a.href = href; a.target = "_blank"; a.rel = "noopener"; a.textContent = text;
+    return a;
+  }
+  function ago(iso) {
+    const s = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (s < 60) return "just now";
+    if (s < 3600) return Math.round(s / 60) + " min ago";
+    if (s < 86400) return Math.round(s / 3600) + " h ago";
+    return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+  function setConn(kind, text) { const c = $("conn"); c.className = "pill " + kind; c.textContent = text; }
+
+  // ---------- setup ----------
+  function enterApp() {
+    $("setup").hidden = true;
+    $("app").hidden = false;
+    loadRuns();
+  }
+  function enterSetup() {
+    $("app").hidden = true;
+    $("setup").hidden = false;
+    setConn("", "Not set up");
+  }
+  $("setup").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    token = $("token").value.trim();
+    const msg = $("setup-msg");
+    if (!token) { show(msg, "bad", "Paste the studio key first."); return; }
+    try {
+      await api("/actions/workflows");
+      store.set("studiovast.key", token);
+      $("token").value = "";
+      msg.hidden = true;
+      enterApp();
+    } catch (err) {
+      show(msg, "bad", explain(err));
+    }
+  });
+  $("forget").addEventListener("click", () => {
+    store.set("studiovast.key", "");
+    token = "";
+    enterSetup();
+  });
+
+  // ---------- compose ----------
+  const brief = $("brief");
+  brief.value = store.get("studiovast.brief") || "";
+  brief.addEventListener("input", () => store.set("studiovast.brief", brief.value));
+  $("ideas").addEventListener("click", (e) => {
+    if (e.target.tagName === "BUTTON") { brief.value = e.target.textContent; store.set("studiovast.brief", brief.value); brief.focus(); }
+  });
+  const checks = [...document.querySelectorAll("#platforms input")];
+  const platforms = () => checks.filter(c => c.checked).map(c => c.value);
+  function updateHint() {
+    const p = platforms();
+    $("platform-hint").textContent = p.length
+      ? `Posts to ${p.join(", ")} when ready. Platforms without saved logins are skipped.`
+      : "Nothing selected: the video is made for you to preview, not posted.";
+    $("go").textContent = p.length ? "Make & post video" : "Make video";
+  }
+  checks.forEach(c => c.addEventListener("change", updateHint));
+  updateHint();
+
+  $("compose").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const go = $("go"), msg = $("compose-msg");
+    go.disabled = true; go.textContent = "Starting…";
+    try {
+      await api("/actions/workflows/ai-influencer.yml/dispatches", {
+        method: "POST",
+        body: { ref: REF, inputs: { brief: brief.value.trim(), platforms: platforms().join(","), character: "nova" } },
+      });
+      show(msg, "ok", "Started. Your video shows up below in a few seconds and is ready in about 5 minutes.");
+      brief.value = ""; store.set("studiovast.brief", "");
+      setTimeout(loadRuns, 4000);
+    } catch (err) {
+      show(msg, "bad", explain(err));
+    } finally {
+      go.disabled = false; updateHint();
+    }
+  });
+
+  $("face").addEventListener("click", async () => {
+    const msg = $("face-msg");
+    try {
+      await api("/actions/workflows/ai-influencer-portraits.yml/dispatches", {
+        method: "POST",
+        body: { ref: REF, inputs: { character: "nova", count: "6", vary_seed: "true" } },
+      });
+      show(msg, "ok", "Making 6 faces. When it's ready below, tap Get files, pick a face, and put its seed number in Edit Nova.");
+      setTimeout(loadRuns, 4000);
+    } catch (err) { show(msg, "bad", explain(err)); }
+  });
+
+  // ---------- runs ----------
+  function statusPill(r) {
+    const p = document.createElement("span");
+    p.className = "pill";
+    const dot = document.createElement("span"); dot.className = "dot";
+    let text;
+    if (r.status !== "completed") { p.classList.add("warn", "run-live"); text = r.status === "queued" ? "Queued" : "Making"; }
+    else if (r.conclusion === "success") { p.classList.add("ok"); text = "Ready"; }
+    else if (r.conclusion === "cancelled") { text = "Cancelled"; }
+    else { p.classList.add("bad"); text = "Failed"; }
+    p.append(dot, " " + text);
+    return p;
+  }
+
+  function btn(text, cls, onClick) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "btn " + (cls || ""); b.textContent = text;
+    b.addEventListener("click", () => onClick(b));
+    return b;
+  }
+
+  function renderRuns(list) {
+    const box = $("runs");
+    if (!list.length) {
+      const p = document.createElement("p");
+      p.className = "hint";
+      p.textContent = "No videos yet. Describe one above and tap Make video.";
+      box.replaceChildren(p);
+      return;
+    }
+    box.replaceChildren(...list.map(r => {
+      const el = document.createElement("article");
+      el.className = "run";
+      const isFace = /portraits/.test(r.path || "");
+      const top = document.createElement("div"); top.className = "run-top";
+      const t = document.createElement("div"); t.className = "run-title";
+      t.textContent = r.display_title || r.name;
+      top.append(t, statusPill(r));
+      const meta = document.createElement("div"); meta.className = "run-meta";
+      meta.textContent = `#${r.run_number} · ${isFace ? "faces" : "video"} · ${ago(r.created_at)}${r.event === "schedule" ? " · automatic" : ""}`;
+      const actions = document.createElement("div"); actions.className = "run-actions";
+      if (r.status === "completed" && r.conclusion === "success") {
+        actions.append(btn(isFace ? "Get files" : "Get video", "dl", (b) => getFiles(r, b, el, isFace)));
+      }
+      if (r.status !== "completed") {
+        actions.append(btn("Cancel", "", async (b) => {
+          b.disabled = true; b.textContent = "Cancelling…";
+          try { await api(`/actions/runs/${r.id}/cancel`, { method: "POST" }); setTimeout(loadRuns, 3000); }
+          catch { b.disabled = false; b.textContent = "Cancel"; }
+        }));
+      }
+      const details = link(r.conclusion === "failure" ? "See error" : "Details", r.html_url);
+      details.className = "btn";
+      actions.append(details);
+      el.append(top, meta, actions);
+      return el;
+    }));
+  }
+
+  // Download the run's files, unzip in the browser and show the video inline.
+  async function getFiles(r, b, card, isFace) {
+    b.disabled = true; b.textContent = "Downloading…";
+    try {
+      const { artifacts } = await api(`/actions/runs/${r.id}/artifacts`);
+      const art = (artifacts || []).find(a => !a.expired);
+      if (!art) { b.textContent = "Files expired"; return; }
+      const res = await fetch(`${API}/actions/artifacts/${art.id}/zip`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
+      });
+      if (!res.ok) throw new StudioError(res.status, "Download failed");
+      const zip = await JSZip.loadAsync(await res.blob());
+      const files = Object.values(zip.files).filter(f => !f.dir);
+      const box = document.createElement("div");
+      box.style.cssText = "display:grid;gap:10px";
+      for (const f of files) {
+        const name = f.name.split("/").pop();
+        const type = name.endsWith(".mp4") ? "video/mp4" : name.endsWith(".jpg") ? "image/jpeg" : "text/plain";
+        const blob = new Blob([await f.async("arraybuffer")], { type });
+        const url = URL.createObjectURL(blob);
+        if (type === "video/mp4") {
+          const v = document.createElement("video");
+          v.src = url; v.controls = true; v.playsInline = true;
+          box.append(v, saveLink("Save video", url, name));
+        } else if (type === "image/jpeg") {
+          const img = document.createElement("img");
+          img.src = url; img.alt = name; img.style.borderRadius = "10px";
+          const cap = document.createElement("div"); cap.className = "run-meta"; cap.textContent = name;
+          box.append(img, cap);
+        } else if (name === "caption.txt") {
+          const text = await blob.text();
+          box.append(btn("Copy caption", "", async (cb) => {
+            try { await navigator.clipboard.writeText(text); cb.textContent = "Copied"; }
+            catch { cb.textContent = "Copy failed — long-press to select"; }
+          }));
+        }
+      }
+      b.remove();
+      card.append(box);
+    } catch (err) {
+      b.disabled = false; b.textContent = isFace ? "Get files" : "Get video";
+      const p = document.createElement("p"); p.className = "msg warn";
+      p.append("Couldn't load it here. ", link("Open the download page", r.html_url + "#artifacts"), " instead.");
+      card.append(p);
+    }
+  }
+  function saveLink(text, url, name) {
+    const a = document.createElement("a");
+    a.href = url; a.download = name; a.textContent = text; a.className = "btn dl";
+    return a;
+  }
+
+  let timer = null;
+  async function loadRuns() {
+    clearTimeout(timer);
+    try {
+      const data = await api("/actions/runs?per_page=15");
+      const runs = (data.workflow_runs || []).filter(r => /ai-influencer/.test(r.path || ""));
+      setConn("ok", "Connected");
+      renderRuns(runs);
+      $("stamp").textContent = "updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      timer = setTimeout(loadRuns, runs.some(r => r.status !== "completed") ? 15000 : 60000);
+    } catch (err) {
+      if (err.status === 401) { setConn("bad", "Key expired"); enterSetup(); show($("setup-msg"), "bad", explain(err)); return; }
+      setConn("warn", "Studio slow");
+      timer = setTimeout(loadRuns, 30000);
+    }
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && token) loadRuns(); });
+
+  token ? enterApp() : enterSetup();
+})();
+
+</script>
+</body>
+</html>
