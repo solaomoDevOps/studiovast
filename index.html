@@ -121,45 +121,92 @@ ol.steps a { color: var(--mint); font-weight: 600; }
 video { width: 100%; max-width: 100%; border-radius: 10px; background: #000; aspect-ratio: 9 / 16; max-height: 70vh; }
 .linkbtn { background: none; border: 0; color: var(--muted); font: 500 13px var(--body); text-decoration: underline; cursor: pointer; padding: 0; justify-self: center; }
 [hidden] { display: none !important; }
+.stack { display: grid; gap: 22px; }
+.stack-sm { display: grid; gap: 10px; }
+.row { display: flex; gap: 14px; align-items: flex-start; }
+.bulk { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn.danger { border-color: var(--bad); color: var(--bad); }
+.btn[disabled] { opacity: .6; cursor: progress; }
+
+.stages { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; border-left: 2px solid var(--line); margin-left: 7px; }
+.stage { position: relative; padding: 4px 0 8px 18px; display: grid; gap: 2px; min-width: 0; }
+.stage-head { display: flex; align-items: center; gap: 8px; }
+.stage b { font-weight: 600; font-size: 15px; }
+.stage small { color: var(--muted); font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
+.stage .time { margin-left: auto; font: 500 12px var(--mono); color: var(--muted); }
+.stage .ico { position: absolute; left: -9px; top: 7px; width: 16px; height: 16px; border-radius: 50%; background: var(--surface); border: 2px solid var(--line); }
+.stage.done .ico { background: var(--ok); border-color: var(--ok); }
+.stage.done .ico::after { content: ""; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid var(--surface); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.stage.running .ico { border-color: var(--warn); background: var(--warn-soft); animation: pulse 1.2s ease-in-out infinite; }
+.stage.running b { color: var(--warn); }
+.stage.failed .ico { background: var(--bad); border-color: var(--bad); }
+.stage.failed b { color: var(--bad); }
+.stage.skipped .ico { border-style: dashed; }
+.stage.skipped b, .stage.waiting b { color: var(--muted); font-weight: 500; }
+@media (prefers-reduced-motion: reduce) { .stage.running .ico { animation: none; } }
+
+details.script { border-top: 1px solid var(--line); padding-top: 10px; }
+details.script summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.scenes { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
+.scene { display: flex; gap: 10px; align-items: flex-start; }
+.scene .thumb { width: 54px; aspect-ratio: 9 / 16; object-fit: cover; border-radius: 6px; background: var(--line); flex: none; }
+.scene-text { min-width: 0; display: grid; gap: 2px; }
+.scene-text p { margin: 0; font-size: 14px; }
+.tag { font: 600 11px/1 var(--body); letter-spacing: .05em; text-transform: uppercase; color: var(--mint); }
+.thumb.missing, .face-img.missing { visibility: hidden; }
+
+.faces { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.face { margin: 0; display: grid; gap: 6px; }
+.face-img { width: 100%; aspect-ratio: 9 / 16; object-fit: cover; border-radius: 8px; background: var(--line); }
+.face .btn { justify-content: center; padding: 8px 6px; font-size: 12px; }
+@media (max-width: 380px) { .faces { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.facebox { width: 72px; flex: none; aspect-ratio: 9 / 16; border-radius: 10px; border: 1px dashed var(--line); display: grid; place-items: center; overflow: hidden; background: var(--bg); }
+.facebox span { font-size: 11px; color: var(--muted); text-align: center; padding: 4px; }
+.facebox img { width: 100%; height: 100%; object-fit: cover; }
+.switch { display: flex; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; }
+.switch input { width: 20px; height: 20px; accent-color: var(--mint); }
+.player { display: grid; gap: 8px; }
+.player:empty { display: none; }
+.tools button.tool { font: inherit; }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div>
       <h1>Studio<span class="cap">Vast</span></h1>
-      <p class="sub">Describe a video. StudioVast makes it in about 5 minutes.</p>
+      <p class="sub">Describe a video. StudioVast writes, films, voices and edits it.</p>
     </div>
     <span id="conn" class="pill">Not set up</span>
   </header>
 
   <!-- One-time setup: paste the studio key -->
   <form id="setup" class="card" autocomplete="off" hidden>
-    <h2>Connect this phone (one time)</h2>
+    <h2>Connect this device (one time)</h2>
     <ol class="steps">
-      <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">this key page</a> and sign in as <b>solaomoDevOps</b>.</li>
-      <li>Name it <code>StudioVast</code>. Set <b>Expiration</b> to 1 year (or the longest offered).</li>
-      <li><b>Repository access</b> → <b>Only select repositories</b> → pick <code>itrealms</code>.</li>
-      <li><b>Permissions</b> → <b>Repository permissions</b> → <b>Actions</b> → <b>Read and write</b>.</li>
+      <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">this key page</a> and sign in with your studio account.</li>
+      <li>Name it <code>StudioVast</code>. Set <b>Expiration</b> to the longest offered.</li>
+      <li><b>Repository access</b> → <b>Only select repositories</b> → pick your video project.</li>
+      <li><b>Permissions</b> → <b>Repository permissions</b>: set <b>Actions</b> and <b>Contents</b> to <b>Read and write</b>.</li>
       <li>Tap <b>Generate token</b>, copy it, and paste it below.</li>
     </ol>
     <label class="lbl" for="token">Studio key</label>
-    <input type="password" id="token" placeholder="github_pat_…" autocapitalize="off" spellcheck="false">
-    <button class="go" type="submit">Connect</button>
+    <input type="password" id="token" placeholder="Paste your key" autocapitalize="off" spellcheck="false">
+    <button class="go" type="submit" id="connect">Connect</button>
     <p id="setup-msg" class="msg" hidden></p>
     <p class="hint">The key is saved only in this browser. Nobody else can see it.</p>
   </form>
 
-  <div id="app" hidden style="display:grid;gap:22px">
+  <div id="app" class="stack" hidden>
     <form id="compose" class="card" autocomplete="off">
-      <label class="lbl" for="brief">What should Nova talk about?</label>
-      <textarea id="brief" placeholder="e.g. 3 free apps that pay you to walk — be funny, end with a challenge"></textarea>
+      <label class="lbl" for="brief">What should <span class="char-name">Nova</span> talk about?</label>
+      <textarea id="brief" placeholder="e.g. Is 10,000 steps a day a myth? Check it against the research."></textarea>
       <div class="ideas" id="ideas" aria-label="Idea starters">
+        <button type="button">Is 10,000 steps a day a myth?</button>
+        <button type="button">Does cracking your knuckles cause arthritis?</button>
         <button type="button">5 free AI tools that can make you your first $100</button>
-        <button type="button">How to flip free curb finds for profit</button>
         <button type="button">The 50/30/20 budget in 30 seconds</button>
-        <button type="button">Side hustles you can start tonight with $0</button>
       </div>
       <span class="lbl">Post it to</span>
       <div class="platforms" id="platforms">
@@ -173,25 +220,40 @@ video { width: 100%; max-width: 100%; border-radius: 10px; background: #000; asp
       <p id="compose-msg" class="msg" hidden></p>
     </form>
 
-    <section style="display:grid;gap:12px">
+    <section class="stack-sm">
       <div class="runs-head">
         <h2>Your videos</h2>
         <span class="stamp" id="stamp"></span>
       </div>
+      <div class="bulk" id="bulk" hidden>
+        <button class="btn" type="button" id="clear-failed">Remove failed</button>
+        <button class="btn" type="button" id="clear-done">Remove all finished</button>
+      </div>
+      <p id="bulk-msg" class="msg" hidden></p>
       <div class="runs" id="runs"></div>
     </section>
 
-    <section style="display:grid;gap:12px">
-      <h2>Setup &amp; tools</h2>
-      <div class="tools">
-        <button class="tool" type="button" id="face"><b>Design the face</b><small>Makes 6 candidate looks for Nova. Pick one, then set its seed.</small></button>
-        <a class="tool" target="_blank" rel="noopener" href="https://github.com/login?return_to=%2FsolaomoDevOps%2Fitrealms%2Fedit%2Fmaster%2Fai-influencer%2Fbriefs.txt"><b>Idea queue</b><small>One idea per line. Daily runs use the top line.</small></a>
-        <a class="tool" target="_blank" rel="noopener" href="https://github.com/login?return_to=%2FsolaomoDevOps%2Fitrealms%2Fedit%2Fmaster%2Fai-influencer%2Fcharacters%2Fnova%2Fcharacter.yaml"><b>Edit Nova</b><small>Look, voice, niche, links and hashtags.</small></a>
-        <a class="tool" target="_blank" rel="noopener" href="https://github.com/login?return_to=%2FsolaomoDevOps%2Fitrealms%2Fsettings%2Fsecrets%2Factions"><b>Keys &amp; accounts</b><small>Add GEMINI_API_KEY and platform logins.</small></a>
+    <section class="stack-sm">
+      <h2>Character &amp; tools</h2>
+      <div class="card">
+        <div class="row">
+          <div class="facebox" id="facebox" aria-label="Locked face"><span>No face locked</span></div>
+          <div class="stack-sm" style="min-width:0">
+            <b id="face-title">Face not locked yet</b>
+            <small class="hint" id="face-sub">Design the face, then tap “Use this face” on the one you like. Every video will use exactly that face.</small>
+            <button class="btn primary" type="button" id="face">Design the face</button>
+          </div>
+        </div>
+        <label class="switch"><input type="checkbox" id="lipsync"><span>Talking (lip-sync)</span></label>
+        <p class="hint" id="lipsync-hint">Moves the mouth with the voice. Free, but adds about 10–20 minutes per video. Needs a locked face.</p>
+        <p id="char-msg" class="msg" hidden></p>
       </div>
-      <p class="hint">If asked to sign in, use the <b>solaomoDevOps</b> account.</p>
-      <p id="face-msg" class="msg" hidden></p>
-      <button class="linkbtn" type="button" id="forget">Disconnect this phone</button>
+      <div class="tools">
+        <a class="tool" target="_blank" rel="noopener" id="link-ideas"><b>Idea queue</b><small>One idea per line. Daily videos use the top line.</small></a>
+        <a class="tool" target="_blank" rel="noopener" id="link-char"><b>Character settings</b><small>Look, voice, niche, links and hashtags.</small></a>
+        <a class="tool" target="_blank" rel="noopener" id="link-keys"><b>Keys &amp; accounts</b><small>Service keys and platform logins.</small></a>
+        <button class="tool" type="button" id="forget"><b>Disconnect</b><small>Forget the studio key on this device.</small></button>
+      </div>
     </section>
   </div>
 
@@ -200,8 +262,10 @@ video { width: 100%; max-width: 100%; border-radius: 10px; background: #000; asp
 
 <script>
 (() => {
-  const API = "https://api.github.com/repos/solaomoDevOps/itrealms";
-  const REF = "master";
+  const GH = "https://api.github.com";
+  const OUT = "studio-runs";
+  const CHAR = "nova";
+  const STAGE_ORDER = ["keys", "script", "images", "voice", "lipsync", "video", "publish"];
   const $ = (id) => document.getElementById(id);
 
   const store = {
@@ -209,52 +273,47 @@ video { width: 100%; max-width: 100%; border-radius: 10px; background: #000; asp
     set(k, v) { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch {} },
   };
   let token = store.get("studiovast.key") || "";
+  let project = null;            // { full, branch }
+  try { project = JSON.parse(store.get("studiovast.project") || "null"); } catch {}
 
-  class StudioError extends Error {
-    constructor(status, message) { super(message); this.status = status; }
-  }
-
-  async function api(path, { method = "GET", body } = {}) {
+  // ---------- API ----------
+  class StudioError extends Error { constructor(status, msg) { super(msg); this.status = status; } }
+  async function call(url, { method = "GET", body, accept = "application/vnd.github+json", as = "json" } = {}) {
     let res;
     try {
-      res = await fetch(API + path, {
-        method,
+      res = await fetch(url.startsWith("http") ? url : GH + url, {
+        method, cache: "no-store",
         headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/vnd.github+json",
-          "X-GitHub-Api-Version": "2022-11-28",
+          Authorization: `Bearer ${token}`, Accept: accept, "X-GitHub-Api-Version": "2022-11-28",
           ...(body ? { "Content-Type": "application/json" } : {}),
         },
         body: body ? JSON.stringify(body) : undefined,
       });
-    } catch {
-      throw new StudioError(0, "No internet connection, or the studio is unreachable right now.");
+    } catch { throw new StudioError(0, "No connection to the studio right now. Check your internet."); }
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new StudioError(res.status, data.message || res.statusText);
     }
     if (res.status === 204) return null;
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new StudioError(res.status, data.message || res.statusText);
-    return data;
+    return as === "blob" ? res.blob() : as === "text" ? res.text() : res.json();
   }
+  const repo = (path, opts) => call(`/repos/${project.full}${path}`, opts);
+  const raw = (path, ref, as = "text") =>
+    repo(`/contents/${path}?ref=${encodeURIComponent(ref)}`, { accept: "application/vnd.github.raw", as });
 
   function explain(err) {
-    if (err.status === 401) return "The studio key was rejected. It may have expired. Tap Disconnect this phone at the bottom and paste a new key.";
-    if (err.status === 403) return "The studio key doesn't have permission. Make a new key with Actions set to Read and write.";
-    if (err.status === 404) return "The studio key can't see the itrealms project. Make a new key and pick itrealms under Only select repositories.";
+    if (err.status === 401) return "The studio key was rejected or expired. Tap Disconnect and connect again with a new key.";
+    if (err.status === 403) return "The studio key is missing a permission. Make a new key with Actions and Contents set to Read and write.";
+    if (err.status === 404) return "The studio key can't see your video project. Make a new key and pick the project under Only select repositories.";
+    if (err.status === 409) return "Someone else changed this at the same moment. Try again.";
     if (err.status === 422) return "The studio rejected the request: " + err.message;
     return err.message || "Something went wrong. Try again in a minute.";
   }
 
-  function show(el, kind, text, extra) {
-    el.className = "msg " + kind;
-    el.textContent = text;
-    if (extra) el.append(" ", extra);
-    el.hidden = false;
-  }
-  function link(text, href) {
-    const a = document.createElement("a");
-    a.href = href; a.target = "_blank"; a.rel = "noopener"; a.textContent = text;
-    return a;
-  }
+  // ---------- helpers ----------
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  function show(box, kind, text) { box.className = "msg " + kind; box.textContent = text; box.hidden = false; }
+  function btn(text, cls, onClick) { const b = el("button", "btn " + (cls || ""), text); b.type = "button"; b.addEventListener("click", () => onClick(b)); return b; }
   function ago(iso) {
     const s = (Date.now() - new Date(iso).getTime()) / 1000;
     if (s < 60) return "just now";
@@ -262,37 +321,60 @@ video { width: 100%; max-width: 100%; border-radius: 10px; background: #000; asp
     if (s < 86400) return Math.round(s / 3600) + " h ago";
     return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
   }
+  function dur(a, b) {
+    const s = Math.max(0, (new Date(b || Date.now()) - new Date(a)) / 1000);
+    return s < 60 ? `${Math.round(s)}s` : `${Math.floor(s / 60)}m ${String(Math.round(s % 60)).padStart(2, "0")}s`;
+  }
   function setConn(kind, text) { const c = $("conn"); c.className = "pill " + kind; c.textContent = text; }
+  const blobToB64 = (blob) => new Promise((ok, bad) => {
+    const r = new FileReader(); r.onload = () => ok(String(r.result).split(",")[1]); r.onerror = bad; r.readAsDataURL(blob);
+  });
+  const textToB64 = (t) => { const bytes = new TextEncoder().encode(t); let s = ""; bytes.forEach(b => s += String.fromCharCode(b)); return btoa(s); };
+  const b64ToText = (b) => new TextDecoder().decode(Uint8Array.from(atob(b.replace(/\n/g, "")), c => c.charCodeAt(0)));
 
   // ---------- setup ----------
-  function enterApp() {
-    $("setup").hidden = true;
-    $("app").hidden = false;
-    loadRuns();
+  async function discover() {
+    const repos = await call("/user/repos?per_page=100&sort=updated");
+    for (const r of repos) {
+      try {
+        await call(`/repos/${r.full_name}/actions/workflows/ai-influencer.yml`);
+        return { full: r.full_name, branch: r.default_branch };
+      } catch {}
+    }
+    throw new StudioError(404, "not found");
   }
-  function enterSetup() {
-    $("app").hidden = true;
-    $("setup").hidden = false;
-    setConn("", "Not set up");
+  function enterSetup(msg) {
+    $("app").hidden = true; $("setup").hidden = false; setConn("", "Not set up");
+    if (msg) show($("setup-msg"), "bad", msg);
+  }
+  function enterApp() {
+    $("setup").hidden = true; $("app").hidden = false;
+    const base = `https://github.com/${project.full}`;
+    $("link-ideas").href = `${base}/edit/${project.branch}/ai-influencer/briefs.txt`;
+    $("link-char").href = `${base}/edit/${project.branch}/ai-influencer/characters/${CHAR}/character.yaml`;
+    $("link-keys").href = `${base}/settings/secrets/actions`;
+    tick();
+    loadCharacter();
   }
   $("setup").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const b = $("connect"), msg = $("setup-msg");
     token = $("token").value.trim();
-    const msg = $("setup-msg");
     if (!token) { show(msg, "bad", "Paste the studio key first."); return; }
+    b.disabled = true; b.textContent = "Connecting…";
     try {
-      await api("/actions/workflows");
+      project = await discover();
       store.set("studiovast.key", token);
-      $("token").value = "";
-      msg.hidden = true;
+      store.set("studiovast.project", JSON.stringify(project));
+      $("token").value = ""; msg.hidden = true;
       enterApp();
     } catch (err) {
       show(msg, "bad", explain(err));
-    }
+    } finally { b.disabled = false; b.textContent = "Connect"; }
   });
   $("forget").addEventListener("click", () => {
-    store.set("studiovast.key", "");
-    token = "";
+    store.set("studiovast.key", ""); store.set("studiovast.project", "");
+    token = ""; project = null; runsCache = [];
     enterSetup();
   });
 
@@ -318,166 +400,325 @@ video { width: 100%; max-width: 100%; border-radius: 10px; background: #000; asp
   $("compose").addEventListener("submit", async (e) => {
     e.preventDefault();
     const go = $("go"), msg = $("compose-msg");
+    const text = brief.value.trim();
+    const label = (text.split("\n").find(l => l.trim()) || "").trim().slice(0, 90);
     go.disabled = true; go.textContent = "Starting…";
     try {
-      await api("/actions/workflows/ai-influencer.yml/dispatches", {
+      await repo("/actions/workflows/ai-influencer.yml/dispatches", {
         method: "POST",
-        body: { ref: REF, inputs: { brief: brief.value.trim(), platforms: platforms().join(","), character: "nova" } },
+        body: { ref: project.branch, inputs: { brief: text, label, platforms: platforms().join(","), character: CHAR } },
       });
-      show(msg, "ok", "Started. Your video shows up below in a few seconds and is ready in about 5 minutes.");
+      show(msg, "ok", "Started. Watch each step below — the first one appears in about 30 seconds.");
       brief.value = ""; store.set("studiovast.brief", "");
-      setTimeout(loadRuns, 4000);
-    } catch (err) {
-      show(msg, "bad", explain(err));
-    } finally {
-      go.disabled = false; updateHint();
-    }
-  });
-
-  $("face").addEventListener("click", async () => {
-    const msg = $("face-msg");
-    try {
-      await api("/actions/workflows/ai-influencer-portraits.yml/dispatches", {
-        method: "POST",
-        body: { ref: REF, inputs: { character: "nova", count: "6", vary_seed: "true" } },
-      });
-      show(msg, "ok", "Making 6 faces. When it's ready below, tap Get files, pick a face, and put its seed number in Edit Nova.");
-      setTimeout(loadRuns, 4000);
+      setTimeout(tick, 4000);
     } catch (err) { show(msg, "bad", explain(err)); }
+    finally { go.disabled = false; updateHint(); }
   });
 
   // ---------- runs ----------
-  function statusPill(r) {
-    const p = document.createElement("span");
-    p.className = "pill";
-    const dot = document.createElement("span"); dot.className = "dot";
+  let runsCache = [];
+  const details = new Map();     // run id -> { status, steps }
+  const expanded = new Set();
+  const blobs = new Map();       // path -> object URL
+
+  const isFaces = (r) => /portraits/.test(r.path || "");
+  const runTitle = (r) => {
+    const t = (r.display_title || r.name || "").split("\n")[0];
+    return t.length > 110 ? t.slice(0, 107) + "…" : t;
+  };
+
+  function pill(r) {
+    const p = el("span", "pill"); const dot = el("span", "dot");
     let text;
-    if (r.status !== "completed") { p.classList.add("warn", "run-live"); text = r.status === "queued" ? "Queued" : "Making"; }
-    else if (r.conclusion === "success") { p.classList.add("ok"); text = "Ready"; }
-    else if (r.conclusion === "cancelled") { text = "Cancelled"; }
+    if (r.status !== "completed") { p.classList.add("warn", "run-live"); text = r.status === "queued" || r.status === "waiting" ? "Queued" : "Making"; }
+    else if (r.conclusion === "success") { p.classList.add("ok"); text = isFaces(r) ? "Faces ready" : "Ready"; }
+    else if (r.conclusion === "cancelled") text = "Cancelled";
     else { p.classList.add("bad"); text = "Failed"; }
     p.append(dot, " " + text);
     return p;
   }
 
-  function btn(text, cls, onClick) {
-    const b = document.createElement("button");
-    b.type = "button"; b.className = "btn " + (cls || ""); b.textContent = text;
-    b.addEventListener("click", () => onClick(b));
-    return b;
+  async function blobUrl(path) {
+    if (blobs.has(path)) return blobs.get(path);
+    const url = URL.createObjectURL(await raw(path, OUT, "blob"));
+    blobs.set(path, url);
+    return url;
+  }
+  function img(path, alt, cls) {
+    const i = el("img", cls); i.alt = alt; i.loading = "lazy";
+    blobUrl(path).then(u => { i.src = u; }).catch(() => i.classList.add("missing"));
+    return i;
   }
 
-  function renderRuns(list) {
-    const box = $("runs");
-    if (!list.length) {
-      const p = document.createElement("p");
-      p.className = "hint";
-      p.textContent = "No videos yet. Describe one above and tap Make video.";
-      box.replaceChildren(p);
-      return;
+  async function loadDetail(r) {
+    const d = details.get(r.id) || {};
+    try { d.status = JSON.parse(await raw(`runs/${r.id}/status.json`, OUT)); } catch { /* not written yet */ }
+    if (r.status !== "completed" || !d.status) {
+      try {
+        const { jobs } = await repo(`/actions/runs/${r.id}/jobs`);
+        d.steps = (jobs[0] && jobs[0].steps) || [];
+      } catch {}
     }
+    details.set(r.id, d);
+  }
+
+  function stageList(r, d) {
+    const box = el("ol", "stages");
+    const st = d.status;
+    if (!st) {
+      const running = (d.steps || []).find(s => s.status === "in_progress");
+      const li = el("li", "stage running");
+      li.append(el("span", "ico"), el("b", null, r.status === "completed" ? "Stopped before the studio started" : "Starting the studio computer"));
+      li.append(el("small", null, running ? running.name + "…" : "Waiting for a free computer…"));
+      box.append(li);
+      return box;
+    }
+    const order = st.kind === "faces" ? Object.keys(st.stages) : STAGE_ORDER.filter(k => st.stages[k]);
+    for (const k of order) {
+      const s = st.stages[k];
+      const li = el("li", "stage " + s.state);
+      const head = el("div", "stage-head");
+      head.append(el("span", "ico"), el("b", null, s.label));
+      if (s.started && s.state !== "waiting") head.append(el("span", "time", dur(s.started, s.finished)));
+      li.append(head);
+      if (s.note && s.state !== "waiting") li.append(el("small", null, s.note));
+      box.append(li);
+    }
+    return box;
+  }
+
+  function scriptBlock(st) {
+    if (!st || !st.scenes || !st.scenes.length) return null;
+    const det = el("details", "script");
+    det.append(el("summary", null, `Script · ${st.scenes.length} scenes${st.seconds ? ` · ${st.seconds}s` : ""}`));
+    const list = el("ol", "scenes");
+    st.scenes.forEach((s) => {
+      const li = el("li", "scene");
+      if (s.thumb) li.append(img(`runs/${st.run_id}/${s.thumb}`, "Scene image", "thumb"));
+      const t = el("div", "scene-text");
+      t.append(el("span", "tag", s.type === "character" ? "On camera" : "B-roll"), el("p", null, s.narration));
+      li.append(t);
+      list.append(li);
+    });
+    det.append(list);
+    return det;
+  }
+
+  function facesBlock(r, st) {
+    if (!st || !st.faces || !st.faces.length) return null;
+    const grid = el("div", "faces");
+    st.faces.forEach(f => {
+      const fig = el("figure", "face");
+      fig.append(img(`runs/${r.id}/${f.file}`, "Face option", "face-img"));
+      fig.append(btn("Use this face", "primary", (b) => lockFace(`runs/${r.id}/${f.file}`, b)));
+      grid.append(fig);
+    });
+    return grid;
+  }
+
+  function renderRuns() {
+    const box = $("runs");
+    const list = runsCache;
+    $("bulk").hidden = !list.some(r => r.status === "completed");
+    if (!list.length) { box.replaceChildren(el("p", "hint", "No videos yet. Describe one above and tap Make video.")); return; }
     box.replaceChildren(...list.map(r => {
-      const el = document.createElement("article");
-      el.className = "run";
-      const isFace = /portraits/.test(r.path || "");
-      const top = document.createElement("div"); top.className = "run-top";
-      const t = document.createElement("div"); t.className = "run-title";
-      t.textContent = r.display_title || r.name;
-      top.append(t, statusPill(r));
-      const meta = document.createElement("div"); meta.className = "run-meta";
-      meta.textContent = `#${r.run_number} · ${isFace ? "faces" : "video"} · ${ago(r.created_at)}${r.event === "schedule" ? " · automatic" : ""}`;
-      const actions = document.createElement("div"); actions.className = "run-actions";
-      if (r.status === "completed" && r.conclusion === "success") {
-        actions.append(btn(isFace ? "Get files" : "Get video", "dl", (b) => getFiles(r, b, el, isFace)));
+      const card = el("article", "run");
+      const d = details.get(r.id) || {};
+      const st = d.status;
+      const top = el("div", "run-top");
+      top.append(el("div", "run-title", (st && st.title) || runTitle(r)), pill(r));
+      const meta = el("div", "run-meta",
+        `#${r.run_number} · ${isFaces(r) ? "faces" : "video"} · ${ago(r.created_at)}` +
+        (r.event === "schedule" ? " · automatic" : "") +
+        (r.status === "completed" ? ` · took ${dur(r.run_started_at || r.created_at, r.updated_at)}` : ""));
+      card.append(top, meta);
+
+      const open = expanded.has(r.id);
+      if (open) {
+        card.append(stageList(r, d));
+        if (st && st.error) {
+          const e = el("div", "msg bad");
+          const label = (st.stages[st.error.stage] || {}).label || st.error.stage;
+          e.append(el("b", null, `Stopped at “${label}”. `), document.createTextNode(st.error.message));
+          card.append(e);
+        } else if (r.conclusion === "failure" && !st) {
+          card.append(el("div", "msg bad", "The studio computer failed while starting. Tap Details to see why."));
+        }
+        if (isFaces(r)) { const f = facesBlock(r, st); if (f) card.append(f); }
+        else { const sb = scriptBlock(st); if (sb) card.append(sb); }
+        const player = el("div", "player"); player.id = "player-" + r.id;
+        card.append(player);
       }
+
+      const actions = el("div", "run-actions");
+      actions.append(btn(open ? "Hide steps" : "Show steps", "", () => {
+        open ? expanded.delete(r.id) : expanded.add(r.id);
+        renderRuns();
+        if (!open) loadDetail(r).then(renderRuns);
+      }));
+      if (st && st.video && r.conclusion === "success") actions.append(btn("Watch video", "dl", (b) => watch(r, b)));
+      if (st && st.caption) actions.append(btn("Copy caption", "", async (b) => {
+        try { await navigator.clipboard.writeText(st.caption); b.textContent = "Copied"; } catch { b.textContent = "Couldn't copy"; }
+      }));
       if (r.status !== "completed") {
         actions.append(btn("Cancel", "", async (b) => {
           b.disabled = true; b.textContent = "Cancelling…";
-          try { await api(`/actions/runs/${r.id}/cancel`, { method: "POST" }); setTimeout(loadRuns, 3000); }
-          catch { b.disabled = false; b.textContent = "Cancel"; }
+          try { await repo(`/actions/runs/${r.id}/cancel`, { method: "POST" }); setTimeout(tick, 3000); }
+          catch (err) { b.disabled = false; b.textContent = "Cancel"; }
         }));
+      } else {
+        actions.append(btn("Remove", "", (b) => confirmRemove(b, [r])));
       }
-      const details = link(r.conclusion === "failure" ? "See error" : "Details", r.html_url);
-      details.className = "btn";
-      actions.append(details);
-      el.append(top, meta, actions);
-      return el;
+      const det = el("a", "btn", "Details"); det.href = r.html_url; det.target = "_blank"; det.rel = "noopener";
+      actions.append(det);
+      card.append(actions);
+      return card;
     }));
   }
 
-  // Download the run's files, unzip in the browser and show the video inline.
-  async function getFiles(r, b, card, isFace) {
-    b.disabled = true; b.textContent = "Downloading…";
+  async function watch(r, b) {
+    b.disabled = true; b.textContent = "Loading video…";
     try {
-      const { artifacts } = await api(`/actions/runs/${r.id}/artifacts`);
-      const art = (artifacts || []).find(a => !a.expired);
-      if (!art) { b.textContent = "Files expired"; return; }
-      const res = await fetch(`${API}/actions/artifacts/${art.id}/zip`, {
-        headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
-      });
-      if (!res.ok) throw new StudioError(res.status, "Download failed");
-      const zip = await JSZip.loadAsync(await res.blob());
-      const files = Object.values(zip.files).filter(f => !f.dir);
-      const box = document.createElement("div");
-      box.style.cssText = "display:grid;gap:10px";
-      for (const f of files) {
-        const name = f.name.split("/").pop();
-        const type = name.endsWith(".mp4") ? "video/mp4" : name.endsWith(".jpg") ? "image/jpeg" : "text/plain";
-        const blob = new Blob([await f.async("arraybuffer")], { type });
-        const url = URL.createObjectURL(blob);
-        if (type === "video/mp4") {
-          const v = document.createElement("video");
-          v.src = url; v.controls = true; v.playsInline = true;
-          box.append(v, saveLink("Save video", url, name));
-        } else if (type === "image/jpeg") {
-          const img = document.createElement("img");
-          img.src = url; img.alt = name; img.style.borderRadius = "10px";
-          const cap = document.createElement("div"); cap.className = "run-meta"; cap.textContent = name;
-          box.append(img, cap);
-        } else if (name === "caption.txt") {
-          const text = await blob.text();
-          box.append(btn("Copy caption", "", async (cb) => {
-            try { await navigator.clipboard.writeText(text); cb.textContent = "Copied"; }
-            catch { cb.textContent = "Copy failed — long-press to select"; }
-          }));
-        }
-      }
+      const url = await blobUrl(`runs/${r.id}/video.mp4`);
+      const box = $("player-" + r.id) || (expanded.add(r.id), renderRuns(), $("player-" + r.id));
+      const v = el("video"); v.src = url; v.controls = true; v.playsInline = true;
+      const save = el("a", "btn dl", "Save video"); save.href = url; save.download = `studiovast-${r.run_number}.mp4`;
+      box.replaceChildren(v, save);
       b.remove();
-      card.append(box);
     } catch (err) {
-      b.disabled = false; b.textContent = isFace ? "Get files" : "Get video";
-      const p = document.createElement("p"); p.className = "msg warn";
-      p.append("Couldn't load it here. ", link("Open the download page", r.html_url + "#artifacts"), " instead.");
-      card.append(p);
+      b.disabled = false; b.textContent = "Watch video";
+      show($("bulk-msg"), "bad", "Couldn't load that video: " + explain(err));
     }
   }
-  function saveLink(text, url, name) {
-    const a = document.createElement("a");
-    a.href = url; a.download = name; a.textContent = text; a.className = "btn dl";
-    return a;
-  }
 
-  let timer = null;
-  async function loadRuns() {
+  function confirmRemove(b, runs) {
+    if (b.dataset.armed) return remove(runs, b);
+    b.dataset.armed = "1";
+    b.textContent = runs.length > 1 ? `Tap again to remove ${runs.length}` : "Tap again to remove";
+    b.classList.add("danger");
+    setTimeout(() => { if (b.isConnected && !b.disabled) { delete b.dataset.armed; b.classList.remove("danger"); b.textContent = b.dataset.label || "Remove"; } }, 4000);
+  }
+  async function remove(runs, b) {
+    b.disabled = true; b.textContent = "Removing…";
+    let gone = 0;
+    for (const r of runs) {
+      try { await repo(`/actions/runs/${r.id}`, { method: "DELETE" }); gone++; details.delete(r.id); expanded.delete(r.id); }
+      catch (err) { show($("bulk-msg"), "bad", explain(err)); break; }
+    }
+    runsCache = runsCache.filter(r => !runs.slice(0, gone).some(x => x.id === r.id));
+    renderRuns();
+    if (gone > 1) show($("bulk-msg"), "ok", `Removed ${gone} runs.`);
+    b.disabled = false; delete b.dataset.armed; b.classList.remove("danger"); b.textContent = b.dataset.label || "Remove";
+  }
+  $("clear-failed").dataset.label = "Remove failed";
+  $("clear-done").dataset.label = "Remove all finished";
+  $("clear-failed").addEventListener("click", (e) => {
+    const list = runsCache.filter(r => r.status === "completed" && r.conclusion !== "success");
+    list.length ? confirmRemove(e.currentTarget, list) : show($("bulk-msg"), "ok", "No failed runs to remove.");
+  });
+  $("clear-done").addEventListener("click", (e) => {
+    const list = runsCache.filter(r => r.status === "completed");
+    list.length ? confirmRemove(e.currentTarget, list) : show($("bulk-msg"), "ok", "Nothing finished to remove.");
+  });
+
+  // ---------- polling ----------
+  let timer = null, firstLoad = true;
+  async function tick() {
     clearTimeout(timer);
+    if (!token || !project) return;
     try {
-      const data = await api("/actions/runs?per_page=15");
-      const runs = (data.workflow_runs || []).filter(r => /ai-influencer/.test(r.path || ""));
+      const data = await repo("/actions/runs?per_page=20");
+      runsCache = (data.workflow_runs || []).filter(r => /ai-influencer/.test(r.path || ""));
       setConn("ok", "Connected");
-      renderRuns(runs);
-      $("stamp").textContent = "updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-      timer = setTimeout(loadRuns, runs.some(r => r.status !== "completed") ? 15000 : 60000);
+      const active = runsCache.filter(r => r.status !== "completed");
+      active.forEach(r => expanded.add(r.id));
+      if (firstLoad && runsCache[0]) { expanded.add(runsCache[0].id); firstLoad = false; }
+      const need = runsCache.filter(r => expanded.has(r.id) && (r.status !== "completed" || !(details.get(r.id) || {}).final));
+      await Promise.all(need.map(async r => { await loadDetail(r); if (r.status === "completed") details.get(r.id).final = true; }));
+      renderRuns();
+      $("stamp").textContent = "updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
+      timer = setTimeout(tick, active.length ? 8000 : 45000);
     } catch (err) {
-      if (err.status === 401) { setConn("bad", "Key expired"); enterSetup(); show($("setup-msg"), "bad", explain(err)); return; }
-      setConn("warn", "Studio slow");
-      timer = setTimeout(loadRuns, 30000);
+      if (err.status === 401) { enterSetup(explain(err)); return; }
+      setConn("warn", "Reconnecting…");
+      timer = setTimeout(tick, 20000);
     }
   }
-  document.addEventListener("visibilitychange", () => { if (!document.hidden && token) loadRuns(); });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && token && project) tick(); });
 
-  token ? enterApp() : enterSetup();
+  // ---------- character ----------
+  const CHAR_DIR = `ai-influencer/characters/${CHAR}`;
+  async function getFile(path) {
+    try { return await repo(`/contents/${path}?ref=${project.branch}`); } catch (e) { if (e.status === 404) return null; throw e; }
+  }
+  async function loadCharacter() {
+    try {
+      const yaml = await getFile(`${CHAR_DIR}/character.yaml`);
+      if (yaml) {
+        const text = b64ToText(yaml.content);
+        const name = (text.match(/^name:\s*(.+)$/m) || [])[1];
+        if (name) document.querySelectorAll(".char-name").forEach(n => n.textContent = name.trim().split(" ")[0]);
+        $("lipsync").checked = /^lipsync:\s*true\b/m.test(text);
+      }
+      const face = await getFile(`${CHAR_DIR}/poses/face.jpg`);
+      if (face) {
+        const blob = await repo(`/contents/${CHAR_DIR}/poses/face.jpg?ref=${project.branch}`, { accept: "application/vnd.github.raw", as: "blob" });
+        const i = el("img"); i.alt = "Locked face"; i.src = URL.createObjectURL(blob);
+        $("facebox").replaceChildren(i);
+        $("face-title").textContent = "Face locked";
+        $("face-sub").textContent = "Every video uses exactly this face. Design new faces any time to change it.";
+        $("face").textContent = "Design new faces";
+      }
+    } catch (err) { show($("char-msg"), "bad", explain(err)); }
+  }
+
+  async function lockFace(path, b) {
+    b.disabled = true; b.textContent = "Locking…";
+    try {
+      const data = await blobToB64(await raw(path, OUT, "blob"));
+      const existing = await getFile(`${CHAR_DIR}/poses/face.jpg`);
+      await repo(`/contents/${CHAR_DIR}/poses/face.jpg`, {
+        method: "PUT",
+        body: { message: "Lock character face", content: data, branch: project.branch, ...(existing ? { sha: existing.sha } : {}) },
+      });
+      b.textContent = "Locked ✓";
+      show($("char-msg"), "ok", "Face locked. Every new video will use exactly this face.");
+      loadCharacter();
+    } catch (err) { b.disabled = false; b.textContent = "Use this face"; show($("char-msg"), "bad", explain(err)); }
+  }
+
+  $("lipsync").addEventListener("change", async (e) => {
+    const on = e.target.checked;
+    e.target.disabled = true;
+    try {
+      const f = await getFile(`${CHAR_DIR}/character.yaml`);
+      let text = b64ToText(f.content);
+      text = /^lipsync:/m.test(text) ? text.replace(/^lipsync:.*$/m, `lipsync: ${on}`) : text + `\nlipsync: ${on}\n`;
+      await repo(`/contents/${CHAR_DIR}/character.yaml`, {
+        method: "PUT",
+        body: { message: `Turn lip-sync ${on ? "on" : "off"}`, content: textToB64(text), sha: f.sha, branch: project.branch },
+      });
+      show($("char-msg"), "ok", on ? "Lip-sync is on for new videos. The first one takes longer while the engine installs." : "Lip-sync is off.");
+    } catch (err) { e.target.checked = !on; show($("char-msg"), "bad", explain(err)); }
+    finally { e.target.disabled = false; }
+  });
+
+  $("face").addEventListener("click", async (e) => {
+    const b = e.currentTarget;
+    b.disabled = true;
+    try {
+      await repo("/actions/workflows/ai-influencer-portraits.yml/dispatches", {
+        method: "POST", body: { ref: project.branch, inputs: { character: CHAR, count: "6", vary_seed: "true" } },
+      });
+      show($("char-msg"), "ok", "Designing 6 faces. They appear under Your videos in a few minutes — tap “Use this face” on your favourite.");
+      setTimeout(tick, 4000);
+    } catch (err) { show($("char-msg"), "bad", explain(err)); }
+    finally { b.disabled = false; }
+  });
+
+  // ---------- boot ----------
+  token && project ? enterApp() : enterSetup();
 })();
-
 </script>
 </body>
 </html>
