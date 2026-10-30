@@ -169,6 +169,15 @@ details.script summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 .player { display: grid; gap: 8px; }
 .player:empty { display: none; }
 .tools button.tool { font: inherit; }
+
+.menu { display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.menu a { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; color: var(--ink); text-decoration: none; }
+.menu a + a { border-top: 1px solid var(--line); }
+.menu a:hover { background: var(--bg); }
+.menu span { display: grid; gap: 2px; min-width: 0; }
+.menu b { font: 600 15px/1.2 var(--body); }
+.menu small { color: var(--muted); font-size: 13px; }
+.menu i { font-style: normal; font-size: 22px; color: var(--muted); line-height: 1; }
 </style>
 </head>
 <body>
@@ -234,7 +243,7 @@ details.script summary { cursor: pointer; font-weight: 600; font-size: 14px; }
     </section>
 
     <section class="stack-sm">
-      <h2>Character &amp; tools</h2>
+      <h2>Character &amp; settings</h2>
       <div class="card">
         <div class="row">
           <div class="facebox" id="facebox" aria-label="Locked face"><span>No face locked</span></div>
@@ -245,15 +254,15 @@ details.script summary { cursor: pointer; font-weight: 600; font-size: 14px; }
           </div>
         </div>
         <label class="switch"><input type="checkbox" id="lipsync"><span>Talking (lip-sync)</span></label>
-        <p class="hint" id="lipsync-hint">Moves the mouth with the voice. Free, but adds about 10–20 minutes per video. Needs a locked face.</p>
+        <p class="hint" id="lipsync-hint">Moves the mouth with the voice. Free, but adds about 15–30 minutes per video. Needs a locked face.</p>
         <p id="char-msg" class="msg" hidden></p>
       </div>
-      <div class="tools">
-        <a class="tool" target="_blank" rel="noopener" id="link-ideas"><b>Idea queue</b><small>One idea per line. Daily videos use the top line.</small></a>
-        <a class="tool" target="_blank" rel="noopener" id="link-char"><b>Character settings</b><small>Look, voice, niche, links and hashtags.</small></a>
-        <a class="tool" target="_blank" rel="noopener" id="link-keys"><b>Keys &amp; accounts</b><small>Service keys and platform logins.</small></a>
-        <button class="tool" type="button" id="forget"><b>Disconnect</b><small>Forget the studio key on this device.</small></button>
-      </div>
+      <nav class="menu" aria-label="Settings">
+        <a target="_blank" rel="noopener" id="link-ideas"><span><b>Idea queue</b><small>Upcoming daily topics</small></span><i aria-hidden="true">›</i></a>
+        <a target="_blank" rel="noopener" id="link-char"><span><b>Character settings</b><small>Look, voice, niche and hashtags</small></span><i aria-hidden="true">›</i></a>
+        <a target="_blank" rel="noopener" id="link-keys"><span><b>Keys &amp; accounts</b><small>Service keys and platform logins</small></span><i aria-hidden="true">›</i></a>
+      </nav>
+      <button class="linkbtn" type="button" id="forget">Disconnect this device</button>
     </section>
   </div>
 
@@ -717,7 +726,14 @@ details.script summary { cursor: pointer; font-weight: 600; font-size: 14px; }
   });
 
   // ---------- boot ----------
-  token && project ? enterApp() : enterSetup();
+  // A saved key without a saved project (older version of this page): find the project quietly.
+  (async () => {
+    if (token && !project) {
+      try { project = await discover(); store.set("studiovast.project", JSON.stringify(project)); }
+      catch (err) { if (err.status === 401) { token = ""; store.set("studiovast.key", ""); } }
+    }
+    token && project ? enterApp() : enterSetup();
+  })();
 })();
 </script>
 </body>
